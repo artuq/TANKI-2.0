@@ -28,13 +28,22 @@ jobs:
           cd build
           cmake -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release ..
 
-      - name: Build with mingw32-make
+      - name: Build with mingw32-make (capture logs)
         shell: msys2 {0}
         run: |
           cd build
-          mingw32-make -j$(nproc)
+          # capture build output to a log file so we can upload it even if build fails
+          mingw32-make -j$(nproc) 2>&1 | tee build_log.txt || true
+
+      - name: Upload build logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Tanks-mingw-logs
+          path: build/build_log.txt
 
       - name: Upload Tanks.exe artifact
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: Tanks-mingw
