@@ -21,6 +21,10 @@ Rect AppConfig::windows_rect = {0, 0, map_rect.w + status_rect.w, map_rect.h};
 #define P2_FIRE_KEY KeyCode::KEY_LCTRL
 #endif
 
+// keys for mine dropping
+#define P1_MINE_KEY KeyCode::KEY_M
+#define P2_MINE_KEY KeyCode::KEY_LSHIFT
+
 vector<Point> AppConfig::player_starting_point =
     []
 {
@@ -47,6 +51,7 @@ vector<KeyCode> AppConfig::player_1_keys =
     v.push_back(KeyCode::KEY_LEFT);
     v.push_back(KeyCode::KEY_RIGHT);
     v.push_back(P1_FIRE_KEY);
+    v.push_back(P1_MINE_KEY); // mine key
     return v;
 }();
 vector<KeyCode> AppConfig::player_2_keys =
@@ -58,6 +63,7 @@ vector<KeyCode> AppConfig::player_2_keys =
     v.push_back(KeyCode::KEY_A);
     v.push_back(KeyCode::KEY_D);
     v.push_back(P2_FIRE_KEY);
+    v.push_back(P2_MINE_KEY); // mine key
     return v;
 }();
 
@@ -76,6 +82,7 @@ unsigned AppConfig::tank_frozen_time = 8000;
 unsigned AppConfig::protect_eagle_time = 15000;
 unsigned AppConfig::bonus_blink_time = 350;
 unsigned AppConfig::player_reload_time = 120;
+unsigned AppConfig::mine_cooldown = 2000; // ms until mine is armed (and player cooldown)
 double AppConfig::tank_default_speed = 0.08;
 double AppConfig::bullet_default_speed = 0.23;
 

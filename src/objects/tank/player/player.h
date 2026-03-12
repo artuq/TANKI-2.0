@@ -37,6 +37,7 @@ private:
     void drawPlayer(Renderer &renderer);
     void respawn();
     void resetKeyStates();
+    bool wantsToDropMine();
 
     StateMachine *m_player_state_machine;
 
@@ -55,6 +56,9 @@ private:
     KeyState m_key_state_left;
     KeyState m_key_state_right;
     KeyState m_key_state_fire;
+    KeyState m_key_state_mine;
+
+    Uint32 m_mine_time;
 
     Direction m_last_pressed_direction;
 

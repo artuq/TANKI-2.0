@@ -6,6 +6,7 @@
 #include "../../appconfig.h"
 #include "../../spriteconfig.h"
 #include "../../soundconfig.h"
+#include "../../objects/mine.h"
 
 #include <stdlib.h>
 #include <ctime>
@@ -98,6 +99,10 @@ void Game::clearAll()
         delete bonus;
     m_bonuses.clear();
 
+    for (auto mine : m_mines)
+        delete mine;
+    m_mines.clear();
+
     delete m_level_environment;
     m_level_environment = nullptr;
 }
@@ -141,6 +146,9 @@ void Game::drawObjects(Renderer &renderer)
 
     for (auto bonus : m_bonuses)
         bonus->draw(renderer);
+
+    for (auto mine : m_mines)
+        mine->draw(renderer);
 
     m_level_environment->drawSecondLayer(renderer);
 }
@@ -235,6 +243,25 @@ void Game::checkCollisions(Uint32 dt)
             if (m_level_environment->checkCollisionBulletWithEagle(bullet))
             {
                 transiteToGameOver();
+            }
+        }
+    }
+    // mines vs enemies
+    for (auto enemy : m_enemies)
+    {
+        for (auto mine : m_mines)
+        {
+            if (mine->isArmed() && !mine->to_erase)
+            {
+                Rect inter = mine->collision_rect.intersection(enemy->collision_rect);
+                if (inter.isNotEmpty())
+                {
+                    while (enemy->alive())
+                        enemy->hit();
+                    mine->explode();
+                    if (!enemy->alive())
+                        m_enemies_to_kill_count--;
+                }
             }
         }
     }
@@ -420,8 +447,23 @@ void Game::updateObjects(Uint32 dt)
         enemy->update(dt);
     for (auto player : m_players)
         player->update(dt);
+    // handle player mine drop requests
+    for (auto player : m_players)
+    {
+        if (player->wantsToDropMine())
+        {
+            Point c = player->center();
+            double mx = c.x - AppConfig::tile_size.w / 2;
+            double my = c.y - AppConfig::tile_size.h / 2;
+            Mine *m = new Mine(mx, my);
+            m_mines.push_back(m);
+        }
+    }
     for (auto bonus : m_bonuses)
         bonus->update(dt);
+    // update mines
+    for (auto mine : m_mines)
+        mine->update(dt);
 
     bool player_muted = false;
     bool player_tried_to_move = false;
@@ -468,6 +510,9 @@ void Game::updateObjects(Uint32 dt)
     m_bonuses.erase(std::remove_if(m_bonuses.begin(), m_bonuses.end(), [](Bonus *b)
                                    {if(b->to_erase) {delete b; return true;} return false; }),
                     m_bonuses.end());
+    m_mines.erase(std::remove_if(m_mines.begin(), m_mines.end(), [](Mine *m)
+                                 {if(m->to_erase) {delete m; return true;} return false; }),
+                  m_mines.end());
 }
 
 void Game::calculateEnemiesTargets()

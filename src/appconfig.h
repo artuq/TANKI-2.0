@@ -42,6 +42,7 @@ struct AppConfig
     static unsigned tank_frozen_time;
     static unsigned protect_eagle_time;
     static unsigned bonus_blink_time;
+    static unsigned mine_cooldown;
     static unsigned player_reload_time;
     static double tank_default_speed;
     static double bullet_default_speed;

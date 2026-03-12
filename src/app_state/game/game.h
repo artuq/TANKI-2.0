@@ -8,6 +8,7 @@
 #include "../../objects/brick.h"
 #include "../../objects/eagle.h"
 #include "../../objects/bonus.h"
+#include "../../objects/mine.h"
 #include "../../engine/state_machine/context_state.h"
 #include "level_environment.h"
 #include <vector>
@@ -55,6 +56,7 @@ private:
     void checkCollisionPlayerWithBonus(Player *player, Bonus *bonus);
 
     void updateObjects(Uint32 dt);
+    void checkCollisionTankWithMines(Tank *tank);
 
     void calculateEnemiesTargets();
     void generateEnemyIfPossible(Uint32 dt);
@@ -70,6 +72,7 @@ private:
     std::vector<Player *> m_players;
     std::vector<Player *> m_killed_players;
     std::vector<Bonus *> m_bonuses;
+    std::vector<Mine *> m_mines;
 
     int m_current_level;
     int m_players_count;

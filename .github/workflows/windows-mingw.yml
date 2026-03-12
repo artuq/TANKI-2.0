@@ -1,0 +1,41 @@
+name: Build Tanks (MSYS2/MinGW)
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-mingw:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup MSYS2 (MINGW64) and install packages
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: |
+            mingw-w64-x86_64-toolchain
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-SDL2
+
+      - name: Configure CMake (MinGW Makefiles)
+        shell: msys2 {0}
+        run: |
+          mkdir -p build
+          cd build
+          cmake -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release ..
+
+      - name: Build with mingw32-make
+        shell: msys2 {0}
+        run: |
+          cd build
+          mingw32-make -j$(nproc)
+
+      - name: Upload Tanks.exe artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Tanks-mingw
+          path: build/**/Tanks.exe

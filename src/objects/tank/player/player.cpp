@@ -18,6 +18,9 @@ Player::Player(double x, double y, SpriteType type, std::vector<KeyCode> control
     m_key_state_left = {control_keys[2], false};
     m_key_state_right = {control_keys[3], false};
     m_key_state_fire = {control_keys[4], false};
+    m_key_state_mine = {control_keys.size() > 5 ? control_keys[5] : KeyCode::KEY_M, false};
+
+    m_mine_time = AppConfig::mine_cooldown; // ready to drop immediately
 
     m_player_state_machine->setState(new CreatingState(this));
 }
@@ -50,6 +53,11 @@ void Player::handleKeyboardEvent(const KeyboardEvent &ev)
         m_key_state_fire.pressed = pressed;
         return;
     }
+    if (key_code == m_key_state_mine.key)
+    {
+        m_key_state_mine.pressed = pressed;
+        return;
+    }
 
     auto updateDir = [&](auto &state, Direction dir) -> bool
     {
@@ -76,6 +84,7 @@ void Player::handleKeyboardEvent(const KeyboardEvent &ev)
 void Player::update(Uint32 dt)
 {
     m_player_state_machine->update(UpdateState{dt});
+    m_mine_time += dt;
 }
 
 void Player::respawn()
@@ -174,6 +183,17 @@ void Player::resetKeyStates()
     m_key_state_left.pressed = false;
     m_key_state_right.pressed = false;
     m_key_state_fire.pressed = false;
+    m_key_state_mine.pressed = false;
+}
+
+bool Player::wantsToDropMine()
+{
+    if (m_key_state_mine.pressed && m_mine_time >= AppConfig::mine_cooldown)
+    {
+        m_mine_time = 0;
+        return true;
+    }
+    return false;
 }
 
 void Player::addScore(unsigned points)
